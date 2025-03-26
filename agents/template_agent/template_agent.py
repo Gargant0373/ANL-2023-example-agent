@@ -195,6 +195,8 @@ class TemplateAgent(DefaultParty):
             # update lambda
             self.lambda_point = max(0.6, min(0.95, 0.9 - 0.3 * concession_ratio))
 
+        if isinstance(action, Accept):
+            self.accepted_bid = cast(Accept, action).getBid()
     def my_turn(self):
         """This method is called when it is our turn. It should decide upon an action
         to perform and send this action to the opponent.
