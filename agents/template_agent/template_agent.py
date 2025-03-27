@@ -33,7 +33,10 @@ from .utils.opponent_model import OpponentModel
 
 class TemplateAgent(DefaultParty):
     """
-    Template of a Python geniusweb agent.
+    Implements an ABiNeS-like strategy with a 'termination condition' (TC)
+    consistent with the paper by Hao et al. The reservation value is treated
+    as an alternative offer. If the discounted reservation outperforms the
+    agent's acceptance threshold, the agent terminates the negotiation.
     """
 
     def __init__(self):
@@ -53,13 +56,14 @@ class TemplateAgent(DefaultParty):
         self.opponent_model: OpponentModel = None
         self.logger.log(logging.INFO, "party is initialized")
         
-        # Non exploitation point
+        # Non-exploitation point λ
         self.lambda_point = 0.9
-        # Behavior pattern
+        # Boulware-like exponent (α>1 => Boulware, 0<α<1 => Conceder)
         self.beta = 1.5
+        
         self.opponent_bid_history = []
         
-        self.reservation_value = 0.5
+        self.reservation_value = 0.5   # fallback if no reservation bid is set
         self.best_received_utility = 0.0
         
         # logs
@@ -68,28 +72,17 @@ class TemplateAgent(DefaultParty):
         self.accepted_bid = None
         self.round_number = 0
 
+
     def notifyChange(self, data: Inform):
-        """MUST BE IMPLEMENTED
-        This is the entry point of all interaction with your agent after is has been initialised.
-        How to handle the received data is based on its class type.
-
-        Args:
-            info (Inform): Contains either a request for action or information.
-        """
-
-        # a Settings message is the first message that will be send to your
-        # agent containing all the information about the negotiation session.
+        """Entry point of all interaction with your agent."""
         if isinstance(data, Settings):
             self.settings = cast(Settings, data)
             self.me = self.settings.getID()
-
-            # progress towards the deadline has to be tracked manually through the use of the Progress object
             self.progress = self.settings.getProgress()
-
             self.parameters = self.settings.getParameters()
             self.storage_dir = self.parameters.get("storage_dir")
 
-            # the profile contains the preferences of the agent over the domain
+            # Load profile
             profile_connection = ProfileConnectionFactory.create(
                 data.getProfile().getURI(), self.getReporter()
             )
@@ -97,263 +90,238 @@ class TemplateAgent(DefaultParty):
             self.domain = self.profile.getDomain()
             profile_connection.close()
 
-        # ActionDone informs you of an action (an offer or an accept)
-        # that is performed by one of the agents (including yourself).
+            # Attempt to set a more accurate reservation value if the profile has one
+            if self.profile.getReservationBid() is not None:
+                self.reservation_value = float(self.profile.getUtility(self.profile.getReservationBid()))
+
         elif isinstance(data, ActionDone):
             action = cast(ActionDone, data).getAction()
             actor = action.getActor()
-
-            # ignore action if it is our action
+            
             if actor != self.me:
-                # obtain the name of the opponent, cutting of the position ID.
+                # Opponent's action
                 self.other = str(actor).rsplit("_", 1)[0]
-
-                # process action done by opponent
                 self.opponent_action(action)
-        # YourTurn notifies you that it is your turn to act
+
         elif isinstance(data, YourTurn):
-            # execute a turn
             self.my_turn()
 
-        # Finished will be send if the negotiation has ended (through agreement or deadline)
         elif isinstance(data, Finished):
             self.save_data()
-            # terminate the agent MUST BE CALLED
             self.logger.log(logging.INFO, "party is terminating:")
             super().terminate()
         else:
             self.logger.log(logging.WARNING, "Ignoring unknown info " + str(data))
 
-    def getCapabilities(self) -> Capabilities:
-        """MUST BE IMPLEMENTED
-        Method to indicate to the protocol what the capabilities of this agent are.
-        Leave it as is for the ANL 2022 competition
 
-        Returns:
-            Capabilities: Capabilities representation class
-        """
+    def getCapabilities(self) -> Capabilities:
+        """Agent capabilities."""
         return Capabilities(
             set(["SAOP"]),
             set(["geniusweb.profile.utilityspace.LinearAdditive"]),
         )
 
     def send_action(self, action: Action):
-        """Sends an action to the opponent(s)
-
-        Args:
-            action (Action): action of this agent
-        """
+        """Sends an action to the opponent(s)."""
         self.getConnection().send(action)
 
-    # give a description of your agent
+
     def getDescription(self) -> str:
-        """MUST BE IMPLEMENTED
-        Returns a description of your agent. 1 or 2 sentences.
+        """A short description of your agent."""
+        return "Template agent for the ANL 2022 competition, ABiNeS-inspired"
 
-        Returns:
-            str: Agent description
-        """
-        return "Template agent for the ANL 2022 competition"
 
-    def opponent_action(self, action):
-        """Process an action that was received from the opponent.
-
-        Args:
-            action (Action): action of opponent
-        """
-        # if it is an offer, set the last received bid
+    def opponent_action(self, action: Action):
+        """Process an action that was received from the opponent."""
         if isinstance(action, Offer):
-            # create opponent model if it was not yet initialised
+            # Initialize model if needed
             if self.opponent_model is None:
                 self.opponent_model = OpponentModel(self.domain)
 
             bid = cast(Offer, action).getBid()
-            
-            # update opponent model with bid
             self.opponent_model.update(bid)
-            # set bid as last received
             self.last_received_bid = bid
-            
+
             self.round_number += 1
-            
             utility = float(self.profile.getUtility(bid))
-            opponent_entry = {
+            self.received_bids.append({
                 "round": self.round_number,
                 "bid": str(bid),
-                "utility": utility,
-            }
-            self.received_bids.append(opponent_entry)
-            
+                "utility": utility
+            })
             self.best_received_utility = max(self.best_received_utility, utility)
-            
-            # lambda adaptation
-            self.opponent_bid_history.append(bid)
-            window = self.opponent_bid_history[-10:]  # use the last 10 bids
-            unique_bids = {str(b) for b in window}
-            concession_ratio = len(unique_bids) / len(window) if window else 0
-            
-            # update lambda
-            self.lambda_point = max(0.6, min(0.95, 0.9 - 0.3 * concession_ratio))
 
-        if isinstance(action, Accept):
+            # λ adaptation based on concession ratio
+            self.opponent_bid_history.append(bid)
+            window = self.opponent_bid_history[-10:]
+            unique_bids = {str(b) for b in window}
+            concession_ratio = len(unique_bids)/len(window) if window else 0.0
+            self.lambda_point = max(0.6, min(0.95, 0.9 - 0.3*concession_ratio))
+
+        elif isinstance(action, Accept):
+            # Opponent accepted something
             self.accepted_bid = cast(Accept, action).getBid()
+
+
     def my_turn(self):
-        """This method is called when it is our turn. It should decide upon an action
-        to perform and send this action to the opponent.
         """
+        Our turn: 
+        1) Check the paper's Termination Condition (TC).
+        2) If not terminating, check if we accept last offer.
+        3) Otherwise propose a new bid.
+        """
+        # 1) Termination Condition => "Algorithm 3" from the paper
         if self.should_terminate():
+            # we "terminate" => no agreement: 
+            # in many frameworks, you can simply do nothing or forcibly end. 
+            # We'll do a logging message and return.
+            self.logger.log(logging.INFO, "Terminating negotiation: reservation is better.")
+            # Typically you might do:
+            # self.getConnection().send(NoAgreement(self.me))  # if your framework has that
+            # then exit:
             return
-        
-        # check if the last received offer is good enough
+
+        # 2) Check acceptance
         if self.accept_condition(self.last_received_bid):
-            # if so, accept the offer
             action = Accept(self.me, self.last_received_bid)
             self.accepted_bid = self.last_received_bid
         else:
-            # if not, find a bid to propose as counter offer
+            # 3) Propose a new bid
             bid = self.find_bid()
             action = Offer(self.me, bid)
             utility = float(self.profile.getUtility(bid))
-            opponent_utility = (
-                self.opponent_model.get_predicted_utility(bid)
-                if self.opponent_model else 0
-            )
-            
+            opp_utility = (self.opponent_model.get_predicted_utility(bid)
+                           if self.opponent_model else 0.0)
             self.sent_bids.append({
                 "round": self.round_number,
                 "bid": str(bid),
                 "utility": utility,
-                "predicted_opponent_utility": opponent_utility,
+                "predicted_opponent_utility": opp_utility,
             })
 
-        # send the action
+        # Send final action
         self.send_action(action)
 
+
     def save_data(self):
-        """This method is called after the negotiation is finished. It can be used to store data
-        for learning capabilities. Note that no extensive calculations can be done within this method.
-        Taking too much time might result in your agent being killed, so use it for storage only.
-        """
+        """Saves negotiation data for post-analysis."""
         data = {
             "received_bids": self.received_bids,
             "sent_bids": self.sent_bids,
             "accepted_bid": str(self.accepted_bid) if self.accepted_bid else None,
             "lambda_point": self.lambda_point,
             "reservation_value": self.reservation_value,
-            }   
+        }
         with open(f"{self.storage_dir}/data.json", "w") as f:
             json.dump(data, f, indent=2)
 
-    ###########################################################################################
-    ################################## Example methods below ##################################
-    ###########################################################################################
+
+    ############################################################################
+    ########################  Accept & Offer Methods  ##########################
+    ############################################################################
 
     def accept_condition(self, bid: Bid) -> bool:
-        if bid is None:
+        """ABiNeS acceptance check: 
+        if utility(bid) < reservation -> reject,
+        else if utility(bid) >= threshold -> accept,
+        else -> reject
+        """
+        if not bid:
             return False
-
         utility = float(self.profile.getUtility(bid))
-
         if utility < self.reservation_value:
             return False
-        
-        threshold = self.get_acceptance_threshold()
-        
-        return utility >= threshold
+        return utility >= self.get_acceptance_threshold()
+
 
     def find_bid(self) -> Bid:
-        # compose a list of all possible bids
+        """Generates a new offer using a combination of 
+        own utility & predicted opponent utility (score-based).
+        """
         domain = self.profile.getDomain()
         all_bids = AllBidsList(domain)
-
-        epsilon = 0.1  # 10% chance to explore
+        epsilon = 0.1
         candidate_bids = []
 
         for _ in range(500):
-            bid = all_bids.get(randint(0, all_bids.size() - 1))
-            utility = float(self.profile.getUtility(bid))
-            
-            if utility < self.reservation_value:
+            candidate = all_bids.get(randint(0, all_bids.size()-1))
+            util = float(self.profile.getUtility(candidate))
+            if util < self.reservation_value:
                 continue
-            
-            opponent_utility = (
-                self.opponent_model.get_predicted_utility(bid)
-                if self.opponent_model
-                else 0
-            )
+            opp_util = self.opponent_model.get_predicted_utility(candidate) if self.opponent_model else 0.0
 
-            # combine using same alpha as before
-            t = self.progress.get(time() * 1000)
-            eps = 0.1
+            # Weighted scoring as in ABiNeS
+            t = self.progress.get(time()*1000)
             alpha = 0.95
-            time_pressure = 1.0 - t ** (1 / eps)
+            eps = 0.1
+            time_pressure = 1.0 - (t**(1/eps))
+            score = alpha*time_pressure*util + (1 - alpha*time_pressure)*opp_util
+            candidate_bids.append((candidate, score))
 
-            score = alpha * time_pressure * utility + (1 - alpha * time_pressure) * opponent_utility
-            candidate_bids.append((bid, score))
-
-        # sort all bids by score descending
         candidate_bids.sort(key=lambda x: x[1], reverse=True)
+        if not candidate_bids:
+            # fallback: random bid
+            return all_bids.get(randint(0, all_bids.size()-1))
 
-        # greedy: explore or exploit
-        if randint(1, 100) <= epsilon * 100:
-            # explore: choose a random good bid from top 50
-            return candidate_bids[randint(0, min(49, len(candidate_bids) - 1))][0]
+        # Epsilon-greedy: 10% chance to pick among top 50 randomly
+        if randint(1,100) <= epsilon*100:
+            top_k = min(49, len(candidate_bids)-1)
+            return candidate_bids[randint(0, top_k)][0]
         else:
-            # exploit: choose best bid
             return candidate_bids[0][0]
 
-    def score_bid(self, bid: Bid, alpha: float = 0.95, eps: float = 0.1) -> float:
-        """Calculate heuristic score for a bid
 
-        Args:
-            bid (Bid): Bid to score
-            alpha (float, optional): Trade-off factor between self interested and
-                altruistic behaviour. Defaults to 0.95.
-            eps (float, optional): Time pressure factor, balances between conceding
-                and Boulware behaviour over time. Defaults to 0.1.
-
-        Returns:
-            float: score
-        """
-        progress = self.progress.get(time() * 1000)
-
-        our_utility = float(self.profile.getUtility(bid))
-
-        time_pressure = 1.0 - progress ** (1 / eps)
-        score = alpha * time_pressure * our_utility
-
-        if self.opponent_model is not None:
-            opponent_utility = self.opponent_model.get_predicted_utility(bid)
-            opponent_score = (1.0 - alpha * time_pressure) * opponent_utility
-            score += opponent_score
-
-        return score
+    ############################################################################
+    #######################  Acceptance Threshold (AT)  ########################
+    ############################################################################
 
     def get_acceptance_threshold(self) -> float:
         """
-        Computes a time adaptive acceptance threshold
+        ABiNeS acceptance threshold, eq. (3) in the paper:
+        For t <= lambda_point:
+            threshold(t) = umax - [umax - umax*delta^(1-lambda)]*(t/lambda)^beta
+        After lambda_point:
+            threshold(t) = umax * delta^(1-t)
+        (In a simpler environment, discount=1 if no discount factor is used)
         """
-        t = self.progress.get(time() * 1000) # progress between [0, 1]
-        umax = 1.0 # maximum utility
-        discount = 1.0
-        
+        t = self.progress.get(time()*1000)
+        # If your profile has discounting:
+        delta = 1
+        umax = 1.0  # normalized max utility
+
         if t <= self.lambda_point:
-            # gradually reduce
-            threshold = umax - (umax - umax * discount ** self.lambda_point) * (t / self.lambda_point) ** self.beta
+            # Boulware from 0..lambda_point
+            # typical formula: threshold(t) = umax - (umax - umax*delta^(1-lambda_point))*(t/lambda_point)^beta
+            term = (umax - umax*(delta**(1 - self.lambda_point)))
+            return umax - term * ((t/self.lambda_point)**self.beta)
         else:
-            # accept any offer over discounted minimum
-            threshold = umax * discount ** t
-        
-        return threshold
-    
+            # after lambda => accept anything >= umax * delta^(1-t)
+            return umax * (delta**(1 - t))
+
+
+    ############################################################################
+    ###########################  Termination (TC)  #############################
+    ############################################################################
+
     def should_terminate(self) -> bool:
         """
-        Determine if the agent should terminate the negotiation.
+        Paper’s Termination Condition (Algorithm 3):
+         if discounted_reservation > current_acceptance_threshold => terminate
+         else => do NOT terminate
+         
+        Interpreted as: treat the reservation value as an alternative 'offer' from
+        the opponent. If that 'offer' is better than your acceptance threshold,
+        the agent is better off stopping negotiation.
         """
+        # 1. Compute the discounted reservation
+        delta = 1
+        t = self.progress.get(time()*1000)
+        # The reservation_value is our "ru0", discount it
+        discounted_reservation = self.reservation_value * (delta**t)
+
+        # 2. Compare with acceptance threshold
+        if discounted_reservation > self.get_acceptance_threshold():
+            # "Accept the reservation" => effectively terminate with no agreement
+            return True
+
         return False
-        # t = self.progress.get(time() * 1000)
-        # discount = 1.0
-        
-        # discounted_reservation = self.reservation_value * discount ** t
-        
-        # return self.best_received_utility < discounted_reservation

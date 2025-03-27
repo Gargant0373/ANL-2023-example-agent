@@ -8,6 +8,7 @@ from decimal import Decimal
 from os import path
 from typing import TypedDict, cast
 
+
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
@@ -390,3 +391,6 @@ class DreamTeam109Agent(DefaultParty):
             score += opponent_score
 
         return score
+
+def partyclass():
+    return DreamTeam109Agent()

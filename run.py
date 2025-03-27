@@ -1,44 +1,59 @@
 import json
 import time
 from pathlib import Path
-
 from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
-RESULTS_DIR = Path("results", time.strftime('%Y%m%d-%H%M%S'))
+# ========== 🔧 CONFIGURATION ==========
+# Customize these:
+NUM_MATCHES = 10
+AGENT_NAME = "Dreamteam109"
+AGENT_CLASS = "agents.ANL2022.dreamteam109_agent.partyclass"
+YOUR_AGENT_CLASS = "agents.template_agent.template_agent.TemplateAgent"
 
-# create results directory if it does not exist
-if not RESULTS_DIR.exists():
-    RESULTS_DIR.mkdir(parents=True)
+DOMAIN = "domain01"  # just change to domain01, domain05, etc.
+PROFILE_A = f"domains/{DOMAIN}/profileA.json"
+PROFILE_B = f"domains/{DOMAIN}/profileB.json"
+# ======================================
 
-# Settings to run a negotiation session:
-#   You need to specify the classpath of 2 agents to start a negotiation. Parameters for the agent can be added as a dict (see example)
-#   You need to specify the preference profiles for both agents. The first profile will be assigned to the first agent.
-#   You need to specify a time deadline (is milliseconds (ms)) we are allowed to negotiate before we end without agreement
+# Create output folder
+RESULTS_DIR = Path("results", f"{NUM_MATCHES}_vs_{AGENT_NAME}_{DOMAIN}_" + time.strftime('%Y%m%d-%H%M%S'))
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Agent settings
 settings = {
     "agents": [
         {
-            "class": "agents.stupid_agent.stupid_agent.StupidAgent",
-            "parameters": {"storage_dir": "agent_storage/StupidAgent"},
+            "class": AGENT_CLASS,
+            "parameters": {"storage_dir": f"agent_storage/{AGENT_NAME}"},
         },
         {
-            "class": "agents.template_agent.template_agent.TemplateAgent",
+            "class": YOUR_AGENT_CLASS,
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
     ],
-    "profiles": ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
+    "profiles": [PROFILE_A, PROFILE_B],
     "deadline_time_ms": 10000,
 }
 
-# run a session and obtain results in dictionaries
-session_results_trace, session_results_summary = run_session(settings)
+# Run loop
+all_traces = []
+all_summaries = []
 
-# plot trace to html file
-if not session_results_trace["error"]:
-    plot_trace(session_results_trace, RESULTS_DIR.joinpath("trace_plot.html"))
+for i in range(NUM_MATCHES):
+    print(f"Running match {i+1}/{NUM_MATCHES}...")
+    trace, summary = run_session(settings)
+    all_traces.append(trace)
+    all_summaries.append(summary)
 
-# write results to file
-with open(RESULTS_DIR.joinpath("session_results_trace.json"), "w", encoding="utf-8") as f:
-    f.write(json.dumps(session_results_trace, indent=2))
-with open(RESULTS_DIR.joinpath("session_results_summary.json"), "w", encoding="utf-8") as f:
-    f.write(json.dumps(session_results_summary, indent=2))
+    if not trace["error"]:
+        plot_trace(trace, RESULTS_DIR.joinpath(f"trace_plot_{i+1}.html"))
+
+# Save results
+with open(RESULTS_DIR / "all_traces.json", "w") as f:
+    json.dump(all_traces, f, indent=2)
+
+with open(RESULTS_DIR / "all_summaries.json", "w") as f:
+    json.dump(all_summaries, f, indent=2)
+
+print(f"✅ Done! Results saved in {RESULTS_DIR}")
