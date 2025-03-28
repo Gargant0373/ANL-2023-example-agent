@@ -504,3 +504,6 @@ class SuperAgent(DefaultParty):
             self._negotiation_data.update_opponent_offers(self.op_sum, self.op_counter)
         except Exception as e:
             self.getReporter().log(logging.INFO, "Error in process_agreements,{}".format(str(e)))
+
+def partyclass():
+    return SuperAgent()

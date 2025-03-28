@@ -6,12 +6,15 @@ from utils.runners import run_session
 
 # ========== 🔧 CONFIGURATION ==========
 # Customize these:
-NUM_MATCHES = 10
-AGENT_NAME = "Dreamteam109"
-AGENT_CLASS = "agents.ANL2022.dreamteam109_agent.partyclass"
+NUM_MATCHES = 2
+AGENT_NAME = "LinearAgent"
+# AGENT_CLASS = "agents.ANL2022.super_agent.partyclass"
+# AGENT_CLASS = "agents.ANL2022.dreamteam109_agent.partyclass"
+AGENT_CLASS = "agents.linear_agent.linear_agent.LinearAgent"
+# AGENT_CLASS = "agents.boulware_agent.boulware_agent.BoulwareAgent"
 YOUR_AGENT_CLASS = "agents.template_agent.template_agent.TemplateAgent"
 
-DOMAIN = "domain01"  # just change to domain01, domain05, etc.
+DOMAIN = "domain00"  # just change to domain01, domain05, etc.
 PROFILE_A = f"domains/{DOMAIN}/profileA.json"
 PROFILE_B = f"domains/{DOMAIN}/profileB.json"
 # ======================================

@@ -62,6 +62,10 @@ class TemplateAgent(DefaultParty):
         self.beta = 1.5
         
         self.opponent_bid_history = []
+
+        self.all_bids = None  # Will store AllBidsList
+        self.bids_with_utilities = None  # Will store list of (bid, utility) tuples
+        self.min_util = 0.5  # Minimum utility threshold for bids we'll consider
         
         self.reservation_value = 0.5   # fallback if no reservation bid is set
         self.best_received_utility = 0.0
@@ -89,6 +93,28 @@ class TemplateAgent(DefaultParty):
             self.profile = profile_connection.getProfile()
             self.domain = self.profile.getDomain()
             profile_connection.close()
+
+            # Precompute all bids and their utilities
+            self.all_bids = AllBidsList(self.domain)
+            self.bids_with_utilities = []
+            for i in range(self.all_bids.size()):
+                bid = self.all_bids.get(i)
+                utility = float(self.profile.getUtility(bid))
+                if utility >= self.reservation_value:  # Only store bids above reservation
+                    self.bids_with_utilities.append((bid, utility))
+            
+            # Sort bids by utility (highest first)
+            self.bids_with_utilities.sort(key=lambda x: x[1], reverse=True)
+            
+            # Set minimum utility to the utility of the 100th best bid (or last if <100)
+            num_top_bids = min(100, len(self.bids_with_utilities))
+            if num_top_bids > 0:
+                self.min_util = self.bids_with_utilities[num_top_bids-1][1]
+
+            self.logger.log(logging.INFO, 
+                f"Precomputed {len(self.bids_with_utilities)} bids. "
+                f"Top utility: {self.bids_with_utilities[0][1] if self.bids_with_utilities else 'None'}"
+            )
 
             # Attempt to set a more accurate reservation value if the profile has one
             if self.profile.getReservationBid() is not None:
@@ -171,15 +197,17 @@ class TemplateAgent(DefaultParty):
         3) Otherwise propose a new bid.
         """
         # 1) Termination Condition => "Algorithm 3" from the paper
-        if self.should_terminate():
-            # we "terminate" => no agreement: 
-            # in many frameworks, you can simply do nothing or forcibly end. 
-            # We'll do a logging message and return.
-            self.logger.log(logging.INFO, "Terminating negotiation: reservation is better.")
-            # Typically you might do:
-            # self.getConnection().send(NoAgreement(self.me))  # if your framework has that
-            # then exit:
-            return
+        # DO NOTHING, NEVER TERMINATE
+
+        # if self.should_terminate():
+        #     # we "terminate" => no agreement: 
+        #     # in many frameworks, you can simply do nothing or forcibly end. 
+        #     # We'll do a logging message and return.
+        #     self.logger.log(logging.INFO, "Terminating negotiation: reservation is better.")
+        #     # Typically you might do:
+        #     # self.getConnection().send(NoAgreement(self.me))  # if your framework has that
+        #     # then exit:
+        #     return
 
         # 2) Check acceptance
         if self.accept_condition(self.last_received_bid):
@@ -235,40 +263,44 @@ class TemplateAgent(DefaultParty):
 
 
     def find_bid(self) -> Bid:
-        """Generates a new offer using a combination of 
-        own utility & predicted opponent utility (score-based).
-        """
-        domain = self.profile.getDomain()
-        all_bids = AllBidsList(domain)
-        epsilon = 0.1
-        candidate_bids = []
-
-        for _ in range(500):
-            candidate = all_bids.get(randint(0, all_bids.size()-1))
-            util = float(self.profile.getUtility(candidate))
-            if util < self.reservation_value:
-                continue
-            opp_util = self.opponent_model.get_predicted_utility(candidate) if self.opponent_model else 0.0
-
-            # Weighted scoring as in ABiNeS
-            t = self.progress.get(time()*1000)
-            alpha = 0.95
-            eps = 0.1
-            time_pressure = 1.0 - (t**(1/eps))
-            score = alpha*time_pressure*util + (1 - alpha*time_pressure)*opp_util
-            candidate_bids.append((candidate, score))
-
-        candidate_bids.sort(key=lambda x: x[1], reverse=True)
-        if not candidate_bids:
-            # fallback: random bid
+        """Generates a new offer using precomputed bids"""
+        if not self.bids_with_utilities:
+            # Fallback if no bids were precomputed
+            domain = self.profile.getDomain()
+            all_bids = AllBidsList(domain)
             return all_bids.get(randint(0, all_bids.size()-1))
 
-        # Epsilon-greedy: 10% chance to pick among top 50 randomly
-        if randint(1,100) <= epsilon*100:
-            top_k = min(49, len(candidate_bids)-1)
-            return candidate_bids[randint(0, top_k)][0]
+        # Only consider bids above reservation value
+        valid_bids = [b for b in self.bids_with_utilities if b[1] >= self.reservation_value]
+        if not valid_bids:
+            return self.bids_with_utilities[0][0]  # Fallback to best bid if none meet reservation
+
+        # Select from top 100 bids (or all if less than 100)
+        num_top_bids = min(100, len(valid_bids))
+        top_bids = valid_bids[:num_top_bids]
+        
+        # Get opponent utilities for scoring
+        t = self.progress.get(time()*1000)
+        alpha = 0.95
+        eps = 0.1
+        time_pressure = 1.0 - (t**(1/eps))
+        
+        # Score top bids
+        scored_bids = []
+        for bid, util in top_bids:
+            opp_util = self.opponent_model.get_predicted_utility(bid) if self.opponent_model else 0.0
+            score = alpha*time_pressure*util + (1 - alpha*time_pressure)*opp_util
+            scored_bids.append((bid, score))
+        
+        # Sort by score
+        scored_bids.sort(key=lambda x: x[1], reverse=True)
+        
+        # Epsilon-greedy: 10% chance to pick randomly from top 50
+        if randint(1,100) <= 10:  # 10% chance
+            top_k = min(49, len(scored_bids)-1)
+            return scored_bids[randint(0, top_k)][0]
         else:
-            return candidate_bids[0][0]
+            return scored_bids[0][0]
 
 
     ############################################################################
