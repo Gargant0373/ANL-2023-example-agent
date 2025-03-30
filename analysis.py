@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 
 # ======================= CONFIGURATION ===========================
-INPUT_JSON_PATH = "results\\10_vs_Boulware_domain00_20250328-203546\\all_summaries.json"
-OUTPUT_CSV_PATH = "utility stats/utility_stats_summary_10_VS_Boulware_DOMAIN00.csv"
+INPUT_JSON_PATH = "results\\30_vs_AgentFO2_domain00_20250330-234119\\all_summaries.json"
+OUTPUT_CSV_PATH = "utility stats/utility_stats_summary_30_VS_AGENTFO2_DOMAIN00_NOBAYESIAN.csv"
 TARGET_AGENT_NAME = "TemplateAgent"
 # ================================================================
 

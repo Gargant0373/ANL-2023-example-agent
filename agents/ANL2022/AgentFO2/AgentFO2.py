@@ -109,17 +109,14 @@ class AgentFO2(DefaultParty):
                 self.other = str(actor).split("_")[-2]
 
                 # read data
-                if self.read_data and os.path.exists(f"{self.storage_dir}/{self.other}.csv"):
-                    with open(f"{self.storage_dir}/{self.other}.csv","r") as f:
-                        reader=csv.reader(f)
-                        l=[row for row in reader]
-                        l=[[float(v) for v in row] for row in l]
-                    self.pre_opponent_utility_log=l[0]
-                    self.pre_opponent_bid_hamming=l[1]
-                    self.which_pre_accept=l[2]
-                    self.pre_strategy=l[3]
-                    self.accept_utilgoal=max(0.8,self.which_pre_accept[1])
-                    self.opponent_strategy_search()
+                # Disable learning from previous runs
+                self.pre_opponent_utility_log = []
+                self.pre_opponent_bid_hamming = []
+                self.which_pre_accept = [-1, 0.0, 0.0]
+                self.pre_strategy = [2, 0.5]  # default strategy: random/other
+                self.accept_utilgoal = 0.8
+                self.opponent_strategy = 2
+
                 self.read_data=False
 
                 # process action done by opponent
@@ -298,12 +295,8 @@ class AgentFO2(DefaultParty):
         Taking too much time might result in your agent being killed, so use it for storage only.
         """
 
-        with open(f"{self.storage_dir}/{self.other}.csv", "w") as f:
-            writer=csv.writer(f)
-            writer.writerow(self.opponent_utility_log)
-            writer.writerow(self.opponent_bid_hamming)
-            writer.writerow(self.which_accept)
-            writer.writerow([self.opponent_strategy,self.min])
+        pass  # Disable saving any logs across sessions
+
 
 
     def accept_condition(self, bid: Bid) -> bool:
@@ -381,4 +374,5 @@ class AgentFO2(DefaultParty):
             ft1 = round(Decimal(1 - pow(t, 1 / e)), 6)  # defaults ROUND_HALF_UP
         return max(min((minUtil + (maxUtil - minUtil) * ft1), maxUtil), minUtil)
 
-
+def partyclass():
+    return AgentFO2()
