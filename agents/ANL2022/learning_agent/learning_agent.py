@@ -35,7 +35,7 @@ from geniusweb.profileconnection.ProfileConnectionFactory import (
 )
 from geniusweb.progress.ProgressTime import ProgressTime
 from geniusweb.references.Parameters import Parameters
-from numpy import long
+long = int
 from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 
 from .LearnedData import LearnedData
