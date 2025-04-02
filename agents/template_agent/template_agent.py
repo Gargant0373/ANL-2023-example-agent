@@ -263,12 +263,12 @@ class TemplateAgent(DefaultParty):
 
 
     def find_bid(self) -> Bid:
-        """Generates a new offer using precomputed bids"""
+        """Generates a new offer using precomputed bids with Nash-product enhancement"""
         if not self.bids_with_utilities:
             # Fallback if no bids were precomputed
             domain = self.profile.getDomain()
             all_bids = AllBidsList(domain)
-            return all_bids.get(randint(0, all_bids.size()-1))
+            return all_bids.get(randint(0, all_bids.size() - 1))
 
         # Only consider bids above reservation value
         valid_bids = [b for b in self.bids_with_utilities if b[1] >= self.reservation_value]
@@ -278,26 +278,26 @@ class TemplateAgent(DefaultParty):
         # Select from top 100 bids (or all if less than 100)
         num_top_bids = min(100, len(valid_bids))
         top_bids = valid_bids[:num_top_bids]
-        
+
         # Get opponent utilities for scoring
-        t = self.progress.get(time()*1000)
+        t = self.progress.get(time() * 1000)
         alpha = 0.95
         eps = 0.1
-        time_pressure = 1.0 - (t**(1/eps))
-        
-        # Score top bids
+        time_pressure = 1.0 - (t ** (1 / eps))
+
         scored_bids = []
         for bid, util in top_bids:
             opp_util = self.opponent_model.get_predicted_utility(bid) if self.opponent_model else 0.0
-            score = alpha*time_pressure*util + (1 - alpha*time_pressure)*opp_util
+            nash = util * opp_util
+            score = alpha * time_pressure * util + (1 - alpha * time_pressure) * opp_util + 0.1 * nash
             scored_bids.append((bid, score))
-        
+
         # Sort by score
         scored_bids.sort(key=lambda x: x[1], reverse=True)
-        
+
         # Epsilon-greedy: 10% chance to pick randomly from top 50
-        if randint(1,100) <= 10:  # 10% chance
-            top_k = min(49, len(scored_bids)-1)
+        if randint(1, 100) <= 10:
+            top_k = min(49, len(scored_bids) - 1)
             return scored_bids[randint(0, top_k)][0]
         else:
             return scored_bids[0][0]

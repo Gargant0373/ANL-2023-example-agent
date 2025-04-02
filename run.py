@@ -9,14 +9,14 @@ from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
-AGENT_1_NAME = "AgentFO2"
-AGENT_1_CLASS = "agents.ANL2022.AgentFO2.partyclass"
+AGENT_1_NAME = "BoulwareAgent"
+AGENT_1_CLASS = "agents.boulware_agent.boulware_agent.BoulwareAgent"
 
 AGENT_2_NAME = "TemplateAgent"
 AGENT_2_CLASS = "agents.template_agent.template_agent.TemplateAgent"
 
 DOMAIN = "domain00"
-NUM_MATCHES = 2
+NUM_MATCHES = 1
 
 PROFILE_A = f"domains/{DOMAIN}/profileA.json"
 PROFILE_B = f"domains/{DOMAIN}/profileB.json"
@@ -94,62 +94,7 @@ stats_path = RESULTS_DIR / "utility_stats.csv"
 pd.DataFrame([stats]).to_csv(stats_path, index=False)
 print(f"📄 Stats saved: {stats_path}")
 
-# ========== 📈 PLOT OUTCOMES ========== #
-def plot_bidspace(data, out_path):
-    all_bids = []
-    agreements = []
 
-    for match in data:
-        u1 = match.get("utility_1") or match.get("utility_3")
-        u2 = match.get("utility_2") or match.get("utility_4")
-        if u1 is not None and u2 is not None:
-            all_bids.append((u1, u2))
-            if match.get("result") == "agreement":
-                agreements.append((u1, u2))
-
-    def pareto(points):
-        points = sorted(set(points), reverse=True)
-        pf, max_b = [], -1
-        for a, b in points:
-            if b > max_b:
-                pf.append((a, b))
-                max_b = b
-        return pf
-
-    # Compute Pareto front
-    pareto_front = pareto(all_bids)
-
-    # Compute special points
-    all_bids_arr = np.array(all_bids)
-    social_welfare_point = max(all_bids, key=lambda x: x[0] + x[1])
-    nash_point = max(all_bids, key=lambda x: x[0] * x[1])
-    kalai_point = max(all_bids, key=lambda x: min(x[0], x[1]))
-
-    # Unzip points
-    x_all, y_all = zip(*all_bids)
-    x_agr, y_agr = zip(*agreements) if agreements else ([], [])
-    x_pf, y_pf = zip(*pareto_front)
-
-    # Plot
-    plt.figure(figsize=(8, 6))
-    plt.scatter(x_all, y_all, s=5, alpha=0.3, color="blue", label="All Bids")
-    plt.scatter(x_agr, y_agr, s=100, color="green", label="Agreement")
-    plt.plot(x_pf, y_pf, marker='o', color='red', linewidth=2, label="Pareto Front")
-    plt.scatter(*social_welfare_point, s=100, marker='s', color='dodgerblue', label="Social Welfare")
-    plt.scatter(*nash_point, s=100, marker='D', color='orange', label="Nash")
-    plt.scatter(*kalai_point, s=100, marker='^', color='limegreen', label="Kalai-Smorodinsky")
-
-    plt.xlabel("Utility A")
-    plt.ylabel("Utility B")
-    plt.title("Negotiation Outcomes in Bid Space")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(out_path)
-    plt.close()
-    print(f"📊 Plot saved: {out_path}")
-
-plot_bidspace(all_summaries, RESULTS_DIR / "negotiation_plot.png")
 
 
 

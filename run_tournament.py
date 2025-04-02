@@ -46,18 +46,18 @@ tournament_settings = {
         # {
         #     "class": "agents.stupid_agent.stupid_agent.StupidAgent",
         # },
-        # {
-        #     "class": "agents.CSE3210.agent2.agent2.Agent2",
-        # },
-        # {
-        #     "class": "agents.CSE3210.agent3.agent3.Agent3",
-        # },
-        # {
-        #     "class": "agents.CSE3210.agent7.agent7.Agent7",
-        # },
-        # {
-        #     "class": "agents.CSE3210.agent11.agent11.Agent11",
-        # },
+        {
+            "class": "agents.CSE3210.agent2.agent2.Agent2",
+        },
+        {
+            "class": "agents.CSE3210.agent3.agent3.Agent3",
+        },
+        {
+            "class": "agents.CSE3210.agent7.agent7.Agent7",
+        },
+        {
+            "class": "agents.CSE3210.agent11.agent11.Agent11",
+        },
         # {
         #     "class": "agents.CSE3210.agent14.agent14.Agent14",
         # },
@@ -76,24 +76,24 @@ tournament_settings = {
         # {
         #     "class": "agents.CSE3210.agent25.agent25.Agent25",
         # },
-        {
-            "class": "agents.CSE3210.agent26.agent26.Agent26",
-        },
-        {
-            "class": "agents.CSE3210.agent27.agent27.Agent27",
-        },
-        {
-            "class": "agents.CSE3210.agent29.agent29.Agent29",
-        },
-        {
-            "class": "agents.CSE3210.agent32.agent32.Agent32",
-        },
-        {
-            "class": "agents.CSE3210.agent33.agent33.Agent33",
-        },
-        {
-            "class": "agents.CSE3210.agent41.agent41.Agent41",
-        },
+        # {
+        #     "class": "agents.CSE3210.agent26.agent26.Agent26",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent27.agent27.Agent27",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent29.agent29.Agent29",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent32.agent32.Agent32",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent33.agent33.Agent33",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent41.agent41.Agent41",
+        # },
         # {
         #     "class": "agents.CSE3210.agent43.agent43.Agent43",
         # },
