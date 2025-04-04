@@ -10,10 +10,10 @@ from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
 AGENT_1_NAME = "BoulwareAgent"
-AGENT_1_CLASS = "agents.boulware_agent.boulware_agent.BoulwareAgent"
+AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
 
 AGENT_2_NAME = "TemplateAgent"
-AGENT_2_CLASS = "agents.template_agent.template_agent.TemplateAgent"
+AGENT_2_CLASS = "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent"
 
 DOMAIN = "domain00"
 NUM_MATCHES = 1

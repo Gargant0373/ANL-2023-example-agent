@@ -31,7 +31,7 @@ from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 from .utils.opponent_model import OpponentModel
 
 
-class TemplateAgent(DefaultParty):
+class Group35Agent(DefaultParty):
     """
     Implements an ABiNeS-like strategy with a 'termination condition' (TC)
     consistent with the paper by Hao et al. The reservation value is treated
