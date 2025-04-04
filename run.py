@@ -13,7 +13,7 @@ AGENT_1_NAME = "Group35"
 AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
 
 AGENT_2_NAME = "Group17"
-AGENT_2_CLASS = "agents.group42_agent.group42_agent.Group42Agent"
+AGENT_2_CLASS = "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids"
 
 DOMAIN = "domain00"
 NUM_MATCHES = 1
