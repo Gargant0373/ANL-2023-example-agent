@@ -22,6 +22,14 @@ from uri.uri import URI
 
 from utils.ask_proceed import ask_proceed
 
+from tudelft_utilities_logging.Reporter import Reporter
+from typing import Optional
+
+class SilentReporter(Reporter):
+
+    def log(self, level:int , msg:str, exc:Optional[BaseException]=None):
+        pass
+
 
 def run_session(settings) -> Tuple[dict, dict]:
     agents = settings["agents"]
@@ -88,7 +96,7 @@ def run_session(settings) -> Tuple[dict, dict]:
     settings_obj = ObjectMapper().parse(settings_full, NegoSettings)
 
     # create the negotiation session runner object
-    runner = Runner(settings_obj, ClassPathConnectionFactory(), StdOutReporter(), 0)
+    runner = Runner(settings_obj, ClassPathConnectionFactory(), SilentReporter(), 0)
 
     # run the negotiation session
     runner.run()

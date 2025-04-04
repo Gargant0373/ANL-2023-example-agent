@@ -12,7 +12,7 @@ from utils.runners import run_session
 AGENT_1_NAME = "Group35"
 AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
 
-AGENT_2_NAME = "Group17"
+AGENT_2_NAME = "Group35Precompute"
 AGENT_2_CLASS = "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids"
 
 DOMAIN = "domain00"
