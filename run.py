@@ -9,11 +9,11 @@ from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
-AGENT_1_NAME = "BoulwareAgent"
+AGENT_1_NAME = "Group35"
 AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
 
-AGENT_2_NAME = "TemplateAgent"
-AGENT_2_CLASS = "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent"
+AGENT_2_NAME = "Group17"
+AGENT_2_CLASS = "agents.group42_agent.group42_agent.Group42Agent"
 
 DOMAIN = "domain00"
 NUM_MATCHES = 1
