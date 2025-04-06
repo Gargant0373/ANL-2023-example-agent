@@ -28,34 +28,34 @@ tournament_settings = {
             "class": "agents.group35_agent.group35_agent.Group35Agent",
             "parameters": {"storage_dir": "agent_storage/Group35Agent"},
         },
+        # {
+        #     "class": "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids",
+        #     "parameters": {"storage_dir": "agent_storage/Group35AgentPrecomputeBids"},
+        # },
+        # {
+        #     "class": "agents.group35_agent_opponent_modelling.group35_agent_opponent_modelling.Group35AgentOpponentModelling",
+        #     "parameters": {"storage_dir": "agent_storage/Group35AgentOpponentModelling"},
+        # },
         {
-            "class": "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentPrecomputeBids"},
+            "class": "agents.charging_boul.charging_boul.ChargingBoul",
+            "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
         },
         {
-            "class": "agents.group35_agent_opponent_modelling.group35_agent_opponent_modelling.Group35AgentOpponentModelling",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentOpponentModelling"},
+            "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
+            "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
         },
-        # {
-        #     "class": "agents.charging_boul.charging_boul.ChargingBoul",
-        #     # "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
-        # },
-        # {
-        #     "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
-        #     "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
-        # },
-        # {
-        #     "class": "agents.super_agent.super_agent.SuperAgent",
-        #     "parameters": {"storage_dir": "agent_storage/SuperAgent"},
-        # },
-        # {
-        #     "class": "agents.group17_agent.group17_agent.Group17Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group17Agent"},
-        # },
-        # {
-        #     "class": "agents.group42_agent.group42_agent.Group42Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group42Agent"},
-        # }
+        {
+            "class": "agents.super_agent.super_agent.SuperAgent",
+            "parameters": {"storage_dir": "agent_storage/SuperAgent"},
+        },
+        {
+            "class": "agents.group17_agent.group17_agent.Group17Agent",
+            "parameters": {"storage_dir": "agent_storage/Group17Agent"},
+        },
+        {
+            "class": "agents.group42_agent.group42_agent.Group42Agent",
+            "parameters": {"storage_dir": "agent_storage/Group42Agent"},
+        }
     ],
     "profile_sets": [
         ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
