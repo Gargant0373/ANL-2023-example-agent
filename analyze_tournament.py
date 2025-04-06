@@ -88,6 +88,30 @@ table = ax.table(
     loc="center"
 )
 
+# 🔍 Determine best (max) and worst (min) values per column (skip first col: 'Agent')
+numeric_cols = df.columns[1:]
+best_indices = {col: df[col].idxmax() for col in numeric_cols}
+worst_indices = {col: df[col].idxmin() for col in numeric_cols}
+
+# 🎨 Style cells: bold max, underline min
+for (row, col), cell in table.get_celld().items():
+    if row == 0:
+        continue  # Skip header
+
+    col_name = df.columns[col]
+    agent_name = df.iloc[row - 1, 0]  # for context, if needed
+
+    # Bold best
+    if col_name in best_indices and df.index[row - 1] == best_indices[col_name]:
+        cell.set_text_props(weight='bold')
+
+    # Underline worst
+    if col_name in worst_indices and df.index[row - 1] == worst_indices[col_name]:
+        # Workaround: simulate underline by adding underscores (matplotlib limitation)
+        val = str(df.iloc[row - 1, col])
+        cell.get_text().set_text(f"_{val}_")
+
+
 # 🔠 Font adjustments
 table.auto_set_font_size(False)
 for (row, col), cell in table.get_celld().items():
