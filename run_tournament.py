@@ -28,9 +28,18 @@ tournament_settings = {
             "class": "agents.template_agent.template_agent.TemplateAgent",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
+        # {
+        #     "class": "agents.boulware_agent.boulware_agent.BoulwareAgent",
+        # },
         {
-            "class": "agents.boulware_agent.boulware_agent.BoulwareAgent",
+            "class": "agents.TemplateAgent_FirstVersion.template_agent_first_version.TemplateAgent_FirstVersion",
         },
+        {
+            "class": "agents.TemplateAgent_SecondVersion.template_agent_second_version.TemplateAgent_SecondVersion",
+        },
+        # {
+        #     "class": "agents.ANL2022.dreamteam109_agent.partyclass",
+        # },
         # {
         #     "class": "agents.conceder_agent.conceder_agent.ConcederAgent",
         # },
@@ -46,18 +55,18 @@ tournament_settings = {
         # {
         #     "class": "agents.stupid_agent.stupid_agent.StupidAgent",
         # },
-        {
-            "class": "agents.CSE3210.agent2.agent2.Agent2",
-        },
-        {
-            "class": "agents.CSE3210.agent3.agent3.Agent3",
-        },
-        {
-            "class": "agents.CSE3210.agent7.agent7.Agent7",
-        },
-        {
-            "class": "agents.CSE3210.agent11.agent11.Agent11",
-        },
+        # {
+        #     "class": "agents.CSE3210.agent2.agent2.Agent2",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent3.agent3.Agent3",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent7.agent7.Agent7",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent11.agent11.Agent11",
+        # },
         # {
         #     "class": "agents.CSE3210.agent14.agent14.Agent14",
         # },
@@ -123,8 +132,9 @@ tournament_settings = {
         # },
     ],
     "profile_sets": [
-        ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
-        # ["domains/domain01/profileA.json", "domains/domain01/profileB.json"],
+        ["domains/domain4/profileA.json", "domains/domain4/profileB.json"],
+        ["domains/domain8/profileA.json", "domains/domain8/profileB.json"],
+        ["domains/domain19/profileA.json", "domains/domain19/profileB.json"]
     ],
     "deadline_time_ms": 10000,
 }

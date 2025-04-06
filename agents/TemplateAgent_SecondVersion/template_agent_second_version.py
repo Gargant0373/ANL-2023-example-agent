@@ -31,7 +31,7 @@ from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 from .utils.opponent_model import OpponentModel
 
 
-class TemplateAgent(DefaultParty):
+class TemplateAgent_SecondVersion(DefaultParty):
     """
     Implements an ABiNeS-like strategy with a 'termination condition' (TC)
     consistent with the paper by Hao et al. The reservation value is treated
@@ -65,9 +65,9 @@ class TemplateAgent(DefaultParty):
 
         self.all_bids = None  # Will store AllBidsList
         self.bids_with_utilities = None  # Will store list of (bid, utility) tuples
-        self.min_util = 0.5  # Minimum utility threshold for bids we'll consider
+        self.min_util = 0.5  
         
-        self.reservation_value = 0.5   # fallback if no reservation bid is set
+        self.reservation_value = 0.3   # fallback if no reservation bid is set
         self.best_received_utility = 0.0
         
         # logs
@@ -259,16 +259,29 @@ class TemplateAgent(DefaultParty):
         utility = float(self.profile.getUtility(bid))
         if utility < self.reservation_value:
             return False
-        return utility >= self.get_acceptance_threshold()
+        
+        threshold = self.get_acceptance_threshold()
+        t = self.progress.get(time() * 1000)
+
+        # Standard acceptance
+        if utility >= threshold:
+            return True
+
+        # New logic: If we're very late in the game and stuck, accept weaker deals
+        if t > 0.985 and utility >= 0.5:
+            return True  # "Take what we can get" mode
+        
+        return False
+
 
 
     def find_bid(self) -> Bid:
-        """Generates a new offer using precomputed bids with Nash-product enhancement"""
+        """Generates a new offer using precomputed bids"""
         if not self.bids_with_utilities:
             # Fallback if no bids were precomputed
             domain = self.profile.getDomain()
             all_bids = AllBidsList(domain)
-            return all_bids.get(randint(0, all_bids.size() - 1))
+            return all_bids.get(randint(0, all_bids.size()-1))
 
         # Only consider bids above reservation value
         valid_bids = [b for b in self.bids_with_utilities if b[1] >= self.reservation_value]
@@ -278,26 +291,26 @@ class TemplateAgent(DefaultParty):
         # Select from top 100 bids (or all if less than 100)
         num_top_bids = min(100, len(valid_bids))
         top_bids = valid_bids[:num_top_bids]
-
+        
         # Get opponent utilities for scoring
-        t = self.progress.get(time() * 1000)
+        t = self.progress.get(time()*1000)
         alpha = 0.95
         eps = 0.1
-        time_pressure = 1.0 - (t ** (1 / eps))
-
+        time_pressure = 1.0 - (t**(1/eps))
+        
+        # Score top bids
         scored_bids = []
         for bid, util in top_bids:
             opp_util = self.opponent_model.get_predicted_utility(bid) if self.opponent_model else 0.0
-            nash = util * opp_util
-            score = alpha * time_pressure * util + (1 - alpha * time_pressure) * opp_util + 0.1 * nash
+            score = alpha*time_pressure*util + (1 - alpha*time_pressure)*opp_util
             scored_bids.append((bid, score))
-
+        
         # Sort by score
         scored_bids.sort(key=lambda x: x[1], reverse=True)
-
+        
         # Epsilon-greedy: 10% chance to pick randomly from top 50
-        if randint(1, 100) <= 10:
-            top_k = min(49, len(scored_bids) - 1)
+        if randint(1,100) <= 10:  # 10% chance
+            top_k = min(49, len(scored_bids)-1)
             return scored_bids[randint(0, top_k)][0]
         else:
             return scored_bids[0][0]

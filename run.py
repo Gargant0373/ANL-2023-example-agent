@@ -9,13 +9,22 @@ from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
-AGENT_1_NAME = "BoulwareAgent"
-AGENT_1_CLASS = "agents.boulware_agent.boulware_agent.BoulwareAgent"
+# AGENT_1_NAME = "DreamTeam"
+# AGENT_1_CLASS = "agents.ANL2022.dreamteam109_agent.partyclass"
+
+AGENT_1_NAME = "SecondVersion"
+AGENT_1_CLASS = "agents.TemplateAgent_FirstVersion.template_agent_first_version.TemplateAgent_FirstVersion"
+
+# AGENT_1_NAME = "TemplateAgent"
+# AGENT_1_CLASS = "agents.template_agent.template_agent.TemplateAgent"
+
+# AGENT_2_NAME = "DreamTeam"
+# AGENT_2_CLASS = "agents.ANL2022.dreamteam109_agent.partyclass"
 
 AGENT_2_NAME = "TemplateAgent"
 AGENT_2_CLASS = "agents.template_agent.template_agent.TemplateAgent"
 
-DOMAIN = "domain00"
+DOMAIN = "domain08"
 NUM_MATCHES = 1
 
 PROFILE_A = f"domains/{DOMAIN}/profileA.json"
