@@ -31,7 +31,7 @@ from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 from .utils.opponent_model import OpponentModel
 
 
-class Group35AgentOpponentModelling(DefaultParty):
+class Group34AgentSecondVersion(DefaultParty):
     """
     Implements an ABiNeS-like strategy with a 'termination condition' (TC)
     consistent with the paper by Hao et al. The reservation value is treated
@@ -65,9 +65,9 @@ class Group35AgentOpponentModelling(DefaultParty):
 
         self.all_bids = None  # Will store AllBidsList
         self.bids_with_utilities = None  # Will store list of (bid, utility) tuples
-        self.min_util = 0.5  # Minimum utility threshold for bids we'll consider
+        self.min_util = 0.5  
         
-        self.reservation_value = 0.5   # fallback if no reservation bid is set
+        self.reservation_value = 0.3   # fallback if no reservation bid is set
         self.best_received_utility = 0.0
         
         # logs
@@ -259,7 +259,20 @@ class Group35AgentOpponentModelling(DefaultParty):
         utility = float(self.profile.getUtility(bid))
         if utility < self.reservation_value:
             return False
-        return utility >= self.get_acceptance_threshold()
+        
+        threshold = self.get_acceptance_threshold()
+        t = self.progress.get(time() * 1000)
+
+        # Standard acceptance
+        if utility >= threshold:
+            return True
+
+        # New logic: If we're very late in the game and stuck, accept weaker deals
+        if t > 0.985 and utility >= 0.5:
+            return True  # "Take what we can get" mode
+        
+        return False
+
 
 
     def find_bid(self) -> Bid:
