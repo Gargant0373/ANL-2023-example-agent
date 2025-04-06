@@ -11,7 +11,11 @@ from utils.runners import run_session
 # ========== 🔧 CONFIG ========== #
 AGENT_1_NAME = "Group34"
 AGENT_1_CLASS = "agents.group34_agent.group34_agent.Group34Agent"
+AGENT_1_NAME = "Group34"
+AGENT_1_CLASS = "agents.group34_agent.group34_agent.Group34Agent"
 
+AGENT_2_NAME = "Group42"
+AGENT_2_CLASS = "agents.group42_agent.group42_agent.Group42Agent"
 # AGENT_2_NAME = "Group34FirstVersion"
 # AGENT_2_CLASS = "agents.group34_agent_first_version.group34_agent_first_version.Group34AgentFirstVersion"
 

@@ -27,6 +27,8 @@ tournament_settings = {
         {
             "class": "agents.group34_agent.group34_agent.Group34Agent",
             "parameters": {"storage_dir": "agent_storage/Group34Agent"},
+            "class": "agents.group34_agent.group34_agent.Group34Agent",
+            "parameters": {"storage_dir": "agent_storage/Group34Agent"},
         },
         # {
         #     "class": "agents.group34_agent_first_version.group34_agent_first_version.Group34AgentFirstVersion",
