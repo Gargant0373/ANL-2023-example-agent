@@ -9,11 +9,11 @@ from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
-AGENT_1_NAME = "Group35"
-AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
+AGENT_1_NAME = "Group34"
+AGENT_1_CLASS = "agents.group34_agent.group34_agent.Group34Agent"
 
-AGENT_2_NAME = "Group35Precompute"
-AGENT_2_CLASS = "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids"
+AGENT_2_NAME = "Group42"
+AGENT_2_CLASS = "agents.group42_agent.group42_agent.Group42Agent"
 
 DOMAIN = "domain00"
 NUM_MATCHES = 1

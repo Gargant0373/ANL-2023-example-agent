@@ -25,41 +25,45 @@ if not RESULTS_DIR.exists():
 tournament_settings = {
     "agents": [
         {
-            "class": "agents.group35_agent.group35_agent.Group35Agent",
-            "parameters": {"storage_dir": "agent_storage/Group35Agent"},
+            "class": "agents.group34_agent.group34_agent.Group34Agent",
+            "parameters": {"storage_dir": "agent_storage/Group34Agent"},
         },
         {
-            "class": "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentPrecomputeBids"},
+            "class": "agents.group34_agent_first_version.group34_agent_first_version.Group34AgentFirstVersion",
+            "parameters": {"storage_dir": "agent_storage/Group34AgentFirstVersion"},
         },
         {
-            "class": "agents.group35_agent_opponent_modelling.group35_agent_opponent_modelling.Group35AgentOpponentModelling",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentOpponentModelling"},
+            "class": "agents.group34_agent_second_version.group34_agent_second_version.Group34AgentSecondVersion",
+            "parameters": {"storage_dir": "agent_storage/Group34AgentSecondVersion"},
         },
-        # {
-        #     "class": "agents.charging_boul.charging_boul.ChargingBoul",
-        #     # "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
-        # },
-        # {
-        #     "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
-        #     "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
-        # },
-        # {
-        #     "class": "agents.super_agent.super_agent.SuperAgent",
-        #     "parameters": {"storage_dir": "agent_storage/SuperAgent"},
-        # },
-        # {
-        #     "class": "agents.group17_agent.group17_agent.Group17Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group17Agent"},
-        # },
-        # {
-        #     "class": "agents.group42_agent.group42_agent.Group42Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group42Agent"},
-        # }
+        {
+            "class": "agents.charging_boul.charging_boul.ChargingBoul",
+            "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
+        },
+        {
+            "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
+            "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
+        },
+        {
+            "class": "agents.super_agent.super_agent.SuperAgent",
+            "parameters": {"storage_dir": "agent_storage/SuperAgent"},
+        },
+        {
+            "class": "agents.group17_agent.group17_agent.Group17Agent",
+            "parameters": {"storage_dir": "agent_storage/Group17Agent"},
+        },
+        {
+            "class": "agents.group42_agent.group42_agent.Group42Agent",
+            "parameters": {"storage_dir": "agent_storage/Group42Agent"},
+        },
+        {
+            "class": "agents.agent2.agent2.Agent2",
+            "parameters": {"storage_dir": "agent_storage/Agent2"}
+        }
     ],
     "profile_sets": [
         ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
-        ["domains/domain09/profileA.json", "domains/domain09/profileB.json"],
+        # ["domains/domain09/profileA.json", "domains/domain09/profileB.json"],
     ],
     "deadline_time_ms": 10000,
 }
