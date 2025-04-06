@@ -62,8 +62,11 @@ tournament_settings = {
         }
     ],
     "profile_sets": [
-        ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
-        # ["domains/domain09/profileA.json", "domains/domain09/profileB.json"],
+        ["domains/domain04/profileA.json", "domains/domain04/profileB.json"],
+        ["domains/domain05/profileA.json", "domains/domain05/profileB.json"],
+        ["domains/domain08/profileA.json", "domains/domain08/profileB.json"],
+        ["domains/domain19/profileA.json", "domains/domain19/profileB.json"],
+        ["domains/domain31/profileA.json", "domains/domain31/profileB.json"],
     ],
     "deadline_time_ms": 10000,
 }

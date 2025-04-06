@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 📂 Set tournament folder
-TOURNAMENT_FOLDER = Path("results/Tournaments/tournament14")  
+TOURNAMENT_FOLDER = Path("results/Tournaments/tournament15")  
 RESULTS_FILE = TOURNAMENT_FOLDER / "tournament_results.json"
 CSV_OUTPUT = TOURNAMENT_FOLDER / "avg_utilities.csv"
 IMG_OUTPUT = TOURNAMENT_FOLDER / "avg_utilities.png"
