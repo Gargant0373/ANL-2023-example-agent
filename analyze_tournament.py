@@ -44,11 +44,11 @@ for match in results:
 # 📋 Prepare DataFrame
 data = {
     "Agent": [],
-    "Avg Utility": [],
-    "Avg Social Welfare": [],
-    "Avg Nash Product": [],
-    "Agreement Rate (%)": [],
-    "Avg Num Offers": []
+    "Avg Util": [],
+    "Avg S.W.": [],
+    "Avg Nash": [],
+    "Agree %": [],
+    "Avg Offers": []
 }
 
 # 🔤 Agent name replacements
@@ -65,21 +65,21 @@ for agent in agent_utilities:
     name = agent_name_map.get(agent, agent)
 
     data["Agent"].append(name)
-    data["Avg Utility"].append(round(sum(agent_utilities[agent]) / match_count, 4))
-    data["Avg Social Welfare"].append(round(sum(agent_social_welfare[agent]) / agreement_count, 4) if agreement_count else 0.0)
-    data["Avg Nash Product"].append(round(sum(agent_nash_product[agent]) / agreement_count, 4) if agreement_count else 0.0)
-    data["Agreement Rate (%)"].append(round((agreement_count / match_count) * 100, 2))
-    data["Avg Num Offers"].append(round(sum(agent_num_offers[agent]) / match_count, 2))
+    data["Avg Util"].append(round(sum(agent_utilities[agent]) / match_count, 4))
+    data["Avg S.W."].append(round(sum(agent_social_welfare[agent]) / agreement_count, 4) if agreement_count else 0.0)
+    data["Avg Nash"].append(round(sum(agent_nash_product[agent]) / agreement_count, 4) if agreement_count else 0.0)
+    data["Agree %"].append(round((agreement_count / match_count) * 100, 2))
+    data["Avg Offers"].append(round(sum(agent_num_offers[agent]) / match_count, 2))
 
 
-df = pd.DataFrame(data).sort_values(by="Avg Utility", ascending=False)
+df = pd.DataFrame(data).sort_values(by="Avg Util", ascending=False)
 
 # 💾 Save as CSV
 df.to_csv(CSV_OUTPUT, index=False)
 print(f"✅ CSV saved: {CSV_OUTPUT}")
 
 # 🖼️ Save as image table
-fig, ax = plt.subplots(figsize=(12, 0.5 * len(df)))
+fig, ax = plt.subplots(figsize=(8, 0.5 * len(df)))
 ax.axis("off")
 table = ax.table(
     cellText=df.values,
@@ -87,6 +87,8 @@ table = ax.table(
     cellLoc="center",
     loc="center"
 )
+
+table.auto_set_column_width(col=list(range(len(df.columns))))
 
 # 🔍 Determine best (max) and worst (min) values per column (skip first col: 'Agent')
 numeric_cols = df.columns[1:]
