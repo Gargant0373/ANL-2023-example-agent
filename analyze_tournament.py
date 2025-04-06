@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 📂 Set tournament folder
-TOURNAMENT_FOLDER = Path("results/Tournaments/tournament15")  
+TOURNAMENT_FOLDER = Path("results/Tournaments/tournament17")  
 RESULTS_FILE = TOURNAMENT_FOLDER / "tournament_results.json"
 CSV_OUTPUT = TOURNAMENT_FOLDER / "avg_utilities.csv"
 IMG_OUTPUT = TOURNAMENT_FOLDER / "avg_utilities.png"
@@ -20,6 +20,8 @@ agent_social_welfare = defaultdict(list)
 agent_nash_product = defaultdict(list)
 agent_agreements = defaultdict(int)
 agent_total_matches = defaultdict(int)
+agent_num_offers = defaultdict(list)
+
 
 for match in results:
     agents = []
@@ -34,6 +36,8 @@ for match in results:
             agents.append(agent)
             utilities.append(utility)
             agent_total_matches[agent] += 1
+            agent_num_offers[agent].append(match["num_offers"])
+
             if match["result"] == "agreement":
                 agent_agreements[agent] += 1
 
@@ -50,7 +54,8 @@ data = {
     "Avg Social Welfare": [],
     "Avg Nash Product": [],
     "Agreement Rate (%)": [],
-    "Match Count": []
+    "Match Count": [],
+    "Avg Num Offers": []
 }
 
 for agent in agent_utilities:
@@ -61,6 +66,7 @@ for agent in agent_utilities:
     data["Avg Social Welfare"].append(round(sum(agent_social_welfare[agent]) / agreement_count, 4) if agreement_count else 0.0)
     data["Avg Nash Product"].append(round(sum(agent_nash_product[agent]) / agreement_count, 4) if agreement_count else 0.0)
     data["Agreement Rate (%)"].append(round((agreement_count / match_count) * 100, 2))
+    data["Avg Num Offers"].append(round(sum(agent_num_offers[agent]) / match_count, 2))
     data["Match Count"].append(match_count)
 
 df = pd.DataFrame(data).sort_values(by="Avg Utility", ascending=False)
