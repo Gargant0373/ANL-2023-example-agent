@@ -174,22 +174,26 @@ class Group42Agent(DefaultParty):
             self.O_opp.append(bid)
 
     def my_turn(self):
-        """This method is called when it is our turn. It should decide upon an action
-        to perform and send this action to the opponent.
-        """
+    # Don't try anything if the session is done
+        if self.progress is None or self.progress.isPastDeadline(time() * 1000):
+            self.logger.log(logging.INFO, "⏳ Skipping my_turn: past deadline or no progress available.")
+            return
+
         # check if the last received offer is good enough
         if self.accept_condition(self.last_received_bid):
-            # if so, accept the offer
             action = Accept(self.me, self.last_received_bid)
         else:
-            # if not, find a bid to propose as counter offer
             bid = self.find_bid()
             action = Offer(self.me, bid)
-            # Add to O_chem for conflict-based strategy
-            self.O_cbom.append(bid)
 
-        # send the action
-        self.send_action(action)
+        # Try to send the action only if connection is still valid
+        conn = self.getConnection()
+        if conn is not None:
+            try:
+                conn.send(action)
+            except Exception as e:
+                self.logger.log(logging.ERROR, f"❌ Could not send action: {e}")
+
 
     def save_data(self):
         """This method is called after the negotiation is finished. It can be used to store data
