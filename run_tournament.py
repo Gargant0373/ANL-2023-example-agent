@@ -25,41 +25,64 @@ if not RESULTS_DIR.exists():
 tournament_settings = {
     "agents": [
         {
-            "class": "agents.group35_agent.group35_agent.Group35Agent",
-            "parameters": {"storage_dir": "agent_storage/Group35Agent"},
+            "class": "agents.group34_agent.group34_agent.Group34Agent",
+            "parameters": {"storage_dir": "agent_storage/Group34Agent"},
+        },
+        # {
+        #     "class": "agents.group34_agent_first_version.group34_agent_first_version.Group34AgentFirstVersion",
+        #     "parameters": {"storage_dir": "agent_storage/Group34AgentFirstVersion"},
+        # },
+        # {
+        #     "class": "agents.group34_agent_second_version.group34_agent_second_version.Group34AgentSecondVersion",
+        #     "parameters": {"storage_dir": "agent_storage/Group34AgentSecondVersion"},
+        # },
+        {
+            "class": "agents.charging_boul.charging_boul.ChargingBoul",
+            "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
         },
         {
-            "class": "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentPrecomputeBids"},
+            "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
+            "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
         },
         {
-            "class": "agents.group35_agent_opponent_modelling.group35_agent_opponent_modelling.Group35AgentOpponentModelling",
-            "parameters": {"storage_dir": "agent_storage/Group35AgentOpponentModelling"},
+            "class": "agents.super_agent.super_agent.SuperAgent",
+            "parameters": {"storage_dir": "agent_storage/SuperAgent"},
         },
-        # {
-        #     "class": "agents.charging_boul.charging_boul.ChargingBoul",
-        #     # "parameters": {"storage_dir": "agent_storage/ChargingBoul"},
-        # },
-        # {
-        #     "class": "agents.dreamteam109_agent.dreamteam109_agent.DreamTeam109Agent",
-        #     "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
-        # },
-        # {
-        #     "class": "agents.super_agent.super_agent.SuperAgent",
-        #     "parameters": {"storage_dir": "agent_storage/SuperAgent"},
-        # },
-        # {
-        #     "class": "agents.group17_agent.group17_agent.Group17Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group17Agent"},
-        # },
-        # {
-        #     "class": "agents.group42_agent.group42_agent.Group42Agent",
-        #     "parameters": {"storage_dir": "agent_storage/Group42Agent"},
-        # }
+        {
+            "class": "agents.group17_agent.group17_agent.Group17Agent",
+            "parameters": {"storage_dir": "agent_storage/Group17Agent"},
+        },
+        {
+            "class": "agents.group42_agent.group42_agent.Group42Agent",
+            "parameters": {"storage_dir": "agent_storage/Group42Agent"},
+        },
+        {
+            "class": "agents.CSE3210.agent7.agent7.Agent7",
+            "parameters": {"storage_dir": "agent_storage/Agent7"},
+        },
+        {
+            "class": "agents.CSE3210.agent26.agent26.Agent26",
+            "parameters": {"storage_dir": "agent_storage/Agent26"},
+        },
+        {
+            "class": "agents.CSE3210.agent32.agent32.Agent32",
+            "parameters": {"storage_dir": "agent_storage/Agent32"},
+        },
+        {
+            "class": "agents.CSE3210.agent55.agent55.Agent55",
+            "parameters": {"storage_dir": "agent_storage/Agent55"},
+        },
     ],
     "profile_sets": [
+        ["domains/domain01/profileA.json", "domains/domain01/profileB.json"],
+        ["domains/domain10/profileA.json", "domains/domain10/profileB.json"],
+        ["domains/domain21/profileA.json", "domains/domain21/profileB.json"],
+        ["domains/domain41/profileA.json", "domains/domain41/profileB.json"],
+        ["domains/domain45/profileA.json", "domains/domain45/profileB.json"],
         ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
-        ["domains/domain09/profileA.json", "domains/domain09/profileB.json"],
+        ["domains/domain08/profileA.json", "domains/domain08/profileB.json"],
+        ["domains/domain34/profileA.json", "domains/domain34/profileB.json"],
+        ["domains/domain17/profileA.json", "domains/domain17/profileB.json"]
     ],
     "deadline_time_ms": 10000,
 }

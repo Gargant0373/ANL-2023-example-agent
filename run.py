@@ -9,13 +9,16 @@ from utils.plot_trace import plot_trace
 from utils.runners import run_session
 
 # ========== 🔧 CONFIG ========== #
-AGENT_1_NAME = "Group35"
-AGENT_1_CLASS = "agents.group35_agent.group35_agent.Group35Agent"
+AGENT_1_NAME = "Group34"
+AGENT_1_CLASS = "agents.group34_agent.group34_agent.Group34Agent"
 
-AGENT_2_NAME = "Group35Precompute"
-AGENT_2_CLASS = "agents.group35_agent_precompute_bids.group35_agent_precompute_bids.Group35AgentPrecomputeBids"
+# AGENT_2_NAME = "Group34FirstVersion"
+# AGENT_2_CLASS = "agents.group34_agent_first_version.group34_agent_first_version.Group34AgentFirstVersion"
 
-DOMAIN = "domain00"
+AGENT_2_NAME = "Group34SecondVersion"
+AGENT_2_CLASS = "agents.group34_agent_second_version.group34_agent_second_version.Group34AgentSecondVersion"
+
+DOMAIN = "domain05"
 NUM_MATCHES = 1
 
 PROFILE_A = f"domains/{DOMAIN}/profileA.json"
