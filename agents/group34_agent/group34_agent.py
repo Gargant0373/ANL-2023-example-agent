@@ -78,7 +78,19 @@ class Group34Agent(DefaultParty):
 
 
     def notifyChange(self, data: Inform):
-        """Entry point of all interaction with your agent."""
+        """
+        Main entry point for all incoming messages to the agent from the GeniusWeb framework.
+
+        This method handles four types of interactions:
+        - `Settings`: Initializes the agent with the negotiation profile, domain, and parameters. 
+        It also precomputes all bids above the reservation value and sorts them by utility.
+        - `ActionDone`: Processes an action taken by the opponent and updates internal state accordingly.
+        - `YourTurn`: Signals that it is the agent’s turn to make a move; triggers decision logic via `my_turn()`.
+        - `Finished`: Signals the end of the negotiation session; triggers cleanup and data saving.
+
+        Args:
+            data (Inform): An object containing context-specific information from the GeniusWeb environment.
+        """
         if isinstance(data, Settings):
             self.settings = cast(Settings, data)
             self.me = self.settings.getID()
@@ -263,7 +275,26 @@ class Group34Agent(DefaultParty):
 
 
     def find_bid(self) -> Bid:
-        """Generates a new offer using precomputed bids with Nash-product enhancement"""
+        """
+        Selects the next bid to propose using a hybrid utility scoring function and epsilon-greedy exploration.
+
+        This method operates on a precomputed and sorted list of bids with their corresponding self-utility values.
+        It filters out bids below the reservation value, selects the top candidates, and then scores them using
+        a weighted function that combines:
+            - Agent's own utility
+            - Predicted opponent utility (via Bayesian modeling)
+            - Nash product of both utilities
+
+        A time-dependent weight is used to shift focus between self-interest and opponent satisfaction as negotiation
+        progresses, with increasing consideration for fairness and agreement as the deadline approaches.
+
+        The final bid is chosen using an epsilon-greedy strategy:
+            - 90% chance to choose the top-scoring bid
+            - 10% chance to pick a random bid from the top 50, to encourage exploration and adaptability
+
+        Returns:
+            Bid: The selected bid object to be proposed.
+        """
         if not self.bids_with_utilities:
             # Fallback if no bids were precomputed
             domain = self.profile.getDomain()

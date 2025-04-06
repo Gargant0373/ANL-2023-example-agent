@@ -8,6 +8,24 @@ from geniusweb.issuevalue.Value import Value
 
 
 class OpponentModel:
+    """
+    Models the opponent's preferences across negotiation issues using Bayesian learning.
+
+    This class maintains a separate BayesianIssueEstimator for each issue in the domain. 
+    Each estimator tracks the value preferences of the opponent based on observed bids,
+    allowing the agent to estimate the opponent's utility for any given bid.
+
+    Attributes:
+        offers (list): History of all bids received from the opponent.
+        domain (Domain): The negotiation domain, containing all issues and their values.
+        issue_estimators (dict): A mapping from issue IDs to their corresponding 
+                                 BayesianIssueEstimator instances.
+
+    Methods:
+        update(bid): Updates all issue estimators with the values from a newly received bid.
+        get_predicted_utility(bid): Estimates the opponent's utility for a given bid 
+                                    based on current value and issue weight predictions.
+    """
     def __init__(self, domain: Domain):
         self.offers = []
         self.domain = domain
@@ -43,7 +61,26 @@ class OpponentModel:
         return sum([iw * vu for iw, vu in zip(issue_weights, value_utilities)])
 
 
-class BayesianIssueEstimator:  # <-- Replaces IssueEstimator
+class BayesianIssueEstimator:
+    """
+    Tracks and estimates the importance of a single issue in the negotiation 
+    using Bayesian updating based on observed opponent bids.
+
+    This class manages multiple BayesianValueEstimators (one per value in the issue)
+    and updates them based on incoming bids. It also estimates the relative weight 
+    of the issue, reflecting how important it appears to be for the opponent.
+
+    Attributes:
+        bids_received (int): Total number of bids observed for this issue.
+        max_value_count (float): Highest observed count (alpha) for any value.
+        num_values (int): Total number of discrete values in this issue.
+        value_trackers (defaultdict): Maps each value to a BayesianValueEstimator.
+        weight (float): Estimated weight of this issue for the opponent.
+    
+    Methods:
+        update(value): Updates internal estimators based on the value selected in the opponent's bid.
+        get_value_utility(value): Returns the estimated utility of a specific value.
+    """  
     def __init__(self, value_set: DiscreteValueSet):
         if not isinstance(value_set, DiscreteValueSet):
             raise TypeError("This estimator only supports discrete values")
@@ -62,7 +99,7 @@ class BayesianIssueEstimator:  # <-- Replaces IssueEstimator
             tracker.update(chosen=(val == value))  # <-- Bayesian update
 
         # Track most frequent value (unchanged logic)
-        current_count = self.value_trackers[value].alpha  # <-- Now using alpha as count
+        current_count = self.value_trackers[value].alpha  # using alpha as count
         self.max_value_count = max(self.max_value_count, current_count)
 
         # Weight calculation remains identical
